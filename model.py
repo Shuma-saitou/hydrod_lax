@@ -3,6 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd
 
+#パラメータ
 pc=3.09e18
 pi=3.14159265359e0
 mp=1.67e-24
@@ -33,6 +34,8 @@ dzi=1/dz
 xx=np.linspace(xmin,xmax,ix)
 zz=np.linspace(zmin,zmax,jx)
 z,x=np.meshgrid(zz,xx)
+
+#初期条件
 ro=np.zeros((ix,jx))
 pr=np.zeros((ix,jx))
 vx=np.zeros((ix,jx))
@@ -42,9 +45,9 @@ ro0=0.024e0*1.67e-24
 potential=(vhalo**2)*np.log(x**2+dh**2)-Grav*Mb/(x+db)-Grav*Md/(ad+np.sqrt(x**2+bd**2))
 ro=ro0*np.exp(-mH*(potential-potential[0,0])*0.6/a)
 pr=ro*kb*Ti/(mH*0.6)
-#print(ro)
 ss=np.sqrt(x**2+z**2)
-#print(ss)
+
+#出力
 df=pd.DataFrame(data=pr,columns=z[0,:],index=x[:,0])
 df.to_csv('/home/theoretical/ダウンロード/canspython/initial'+'.csv')#,columns=[1.236000e+17])
 

@@ -49,15 +49,3 @@ df=pd.DataFrame(data=pr,columns=z[0,:],index=x[:,0])
 df.to_csv('/home/theoretical/ダウンロード/canspython/initial'+'.csv')#,columns=[1.236000e+17])
 
 
-#plt.contour(x,z,pr)
-#plt.gca().set_aspect('equal')
-#plt.show()
-#for i in range(ix):
-#    for j in range(jx):
-#        ro[i,j]=1.e0
-#        vx[i,j]=0.e0
-#        vz[i,j]=0.e0
-#        ss=math.sqrt(x(i)**2+z(j)**2)
-#        pr[i,j]=prism+(1.e0-prism)*math.exp(-(ss/wexp)**2)
-#df=pd.DataFrame(data=pr,columns=x[0,:],index=z[:,1])
-#print(df)

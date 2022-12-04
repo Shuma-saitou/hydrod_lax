@@ -23,8 +23,8 @@ Md = 1.e11*1.989e33
 ad = 6.5*1.e3*3.09e18
 bd = 0.26*1.e3*3.09e18
 a=kb*Ti
-xmin=1.e3*3.09e18
-xmax=15e3*3.09e18
+xmin=1.e3*3.09e18/math.sqrt(2.e0)
+xmax=15e3*3.09e18/math.sqrt(2.e0)
 zmin=xmin
 zmax=xmax
 dx=(xmax-xmin)/(ix-1)
@@ -34,6 +34,7 @@ dzi=1/dz
 xx=np.linspace(xmin,xmax,ix)
 zz=np.linspace(zmin,zmax,jx)
 z,x=np.meshgrid(zz,xx)
+r=np.sqrt(x**2+z**2)
 
 #初期条件
 ro=np.zeros((ix,jx))
@@ -42,11 +43,9 @@ vx=np.zeros((ix,jx))
 vz=np.zeros((ix,jx))
 potential=np.zeros((ix,jx))
 ro0=0.024e0*1.67e-24
-potential=(vhalo**2)*np.log(x**2+dh**2)-Grav*Mb/(x+db)-Grav*Md/(ad+np.sqrt(x**2+bd**2))
+potential=(vhalo**2)*np.log(r**2+dh**2)-Grav*Mb/(r+db)-Grav*Md/(ad+np.sqrt(r**2+bd**2))
 ro=ro0*np.exp(-mH*(potential-potential[0,0])*0.6/a)
 pr=ro*kb*Ti/(mH*0.6)
-ss=np.sqrt(x**2+z**2)
-
 #出力
 df=pd.DataFrame(data=pr,columns=z[0,:],index=x[:,0])
 df.to_csv('/home/theoretical/ダウンロード/canspython/initial'+'.csv')#,columns=[1.236000e+17])

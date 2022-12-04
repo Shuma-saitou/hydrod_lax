@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import model
 from mpl_toolkits.mplot3d import axes3d
 import pandas as pd
+import math
 
 #パラメータ
 ix,jx=model.ix,model.jx
@@ -12,11 +13,9 @@ year=3.16e7
 tend=9.e0*year*1.e6
 dtout=0.1e0*tend
 nstop=1000000
-ns=0
 t=0.0e0
 tt=0.0e0
 nd=1
-mwflag=0
 safety=0.4e0
 dtmin=1.e-10*tend
 gm=5.e0/3.e0
@@ -28,6 +27,9 @@ dx=model.dx
 dxi=model.dxi
 dz=model.dz
 dzi=model.dzi
+r=model.r
+cosr=x/r
+sinr=z/r
 dfdx=np.zeros((ix,jx))
 dfdz=np.zeros((ix,jx))
 xm=x+dx/2.e0
@@ -43,7 +45,7 @@ def cfl(dt,ro,pr,vx,vz):
     cs2=np.zeros((ix,jx))
     v2=vx**2+vz**2
     cs2=gm*pr/ro
-    dtq=safety*min(dx,dz)/np.sqrt(v2+cs2)
+    dtq=safety*math.sqrt(dx**2+dz**2)/np.sqrt(v2+cs2)
     dt=np.amin(dtq)
     return dt
 
@@ -164,17 +166,33 @@ for i in range(nstop):
     t=t+dt
     nt1=int(tt/dtout)
     nt2=int(t/dtout)
-    ro[0,:]=9.3*1.67e-27
-    vx[0,:]=1.1e8
-    pr[0,:]=ro[0,:]*kb*Ti/(1.67e-24*0.6e0)
+    #銀河中心から供給するガス
+    ro[0,0]=9.3*1.67e-27
+    v=1.1e8
+    vx[0,0]=v*cosr[0,0]
+    vz[0,0]=v*sinr[0,0]
+    pr[0,0]=ro[0,0]*kb*Ti/(1.67e-24)
+    #流体計算
     ro,vx,vz,pr=culc(ro,vx,vz,pr)
+    #境界条件
     ro=bnd(ro)
     vx=bnd(vx)
     vz=bnd(vz)
     pr=bnd(pr)
+    #終わる時間の1/10ごとに出力
     if nt1<nt2:
+        T=pr/(ro*kb)
+        df=pd.DataFrame(data=pr,columns=z[0,:],index=x[:,0])
+        df.to_csv('pr'+str(nd)+'Myr.csv')
+        df=pd.DataFrame(data=vx,columns=z[0,:],index=x[:,0])
+        df.to_csv('vx'+str(nd)+'Myr.csv')
+        df=pd.DataFrame(data=vz,columns=z[0,:],index=x[:,0])
+        df.to_csv('vz'+str(nd)+'Myr.csv')
+        df=pd.DataFrame(data=T,columns=z[0,:],index=x[:,0])
+        df.to_csv('T'+str(nd)+'Myr.csv')
         df=pd.DataFrame(data=ro,columns=z[0,:],index=x[:,0])
-        df.to_csv('/home/theoretical/ダウンロード/canspython/df'+'str(i)'+'.csv')
+        df.to_csv('ro'+str(nd)+'Myr.csv')
+        nd=nd+1
         #tがtendを超えたら終了
         if int(t/tend)==1:
             break
@@ -183,27 +201,16 @@ for i in range(nstop):
 ro=ro/mH
 T=pr/(ro*kb)
 df=pd.DataFrame(data=ro,columns=z[0,:],index=x[:,0])
-df.to_csv('/home/theoretical/ダウンロード/canspython/ro.csv')
+df.to_csv('')
 df=pd.DataFrame(data=pr,columns=z[0,:],index=x[:,0])
-df.to_csv('/home/theoretical/ダウンロード/canspython/pr.csv')
+df.to_csv('')
 df=pd.DataFrame(data=vx,columns=z[0,:],index=x[:,0])
-df.to_csv('/home/theoretical/ダウンロード/canspython/vx.csv')
-df=pd.DataFrame(data=vx,columns=z[0,:],index=x[:,0])
-df.to_csv('/home/theoretical/ダウンロード/canspython/vx.csv')
+df.to_csv('')
+df=pd.DataFrame(data=vz,columns=z[0,:],index=x[:,0])
+df.to_csv('')
 df=pd.DataFrame(data=T,columns=z[0,:],index=x[:,0])
-df.to_csv('/home/theoretical/ダウンロード/canspython/vx.csv')
+df.to_csv('')
 print(t)
-#plt.contour(x,z,vx)
-#plt.gca().set_aspect('equal')
-#fig = plt.figure(figsize = (8, 6))
-#ax = fig.add_subplot(111, projection="3d")
-# 3DAxesの設定
-#ax.set_xlabel("x", size = 15)
-#ax.set_ylabel("y", size = 15)
-#ax.set_zlabel("z", size = 15)
-#ax.view_init(45, 45)
-# 曲面を描画
-#ax.plot_surface(x, z, pr, cmap = "autumn")
-#ax.plot_wireframe(x,z,pr)
-#print(x,z)
-#plt.show()
+plt.contour(x,z,ro)
+plt.gca().set_aspect('equal')
+plt.show()
